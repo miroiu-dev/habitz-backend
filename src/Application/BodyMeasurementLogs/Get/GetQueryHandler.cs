@@ -16,8 +16,9 @@ internal class GetQueryHandler(IApplicationDbContext context)
 {
     public async Task<Result<GetResponse>> Handle(GetQuery request, CancellationToken cancellationToken)
     {
-        List<BodyMeasurementLogResponse> logs = await context.BodyMeasurementLogs.Where(x => x.CreatedAt.Date == request.Date.Date && x.UserId == request.UserId).OrderByDescending(log => log.CreatedAt).Select(log => new BodyMeasurementLogResponse(log.Id, log.Neck, log.Shoulder, log.LeftBiceps, log.RightBiceps, log.Chest, log.Waist, log.Abs, log.Hip, log.LeftTigh, log.RightTigh, log.LeftCalf, log.RightCalf, log.WaistHipRatio, log.CreatedAt)).ToListAsync(cancellationToken);
+        List<BodyMeasurementLogResponse> measurements = await context.BodyMeasurementLogs.Where(x => x.CreatedAt.Date == request.Date.Date && x.UserId == request.UserId).OrderByDescending(log => log.CreatedAt).Select(log => new BodyMeasurementLogResponse(log.Id, log.Neck, log.Shoulder, log.LeftBiceps, log.RightBiceps, log.Chest, log.Waist, log.Abs, log.Hip, log.LeftTigh, log.RightTigh, log.LeftCalf, log.RightCalf, log.WaistHipRatio, log.CreatedAt)).ToListAsync(cancellationToken);
+        List<DateTime> availableDates = await context.BodyMeasurementLogs.Where(x => x.UserId == request.UserId).OrderByDescending(log => log.CreatedAt).Select(log => log.CreatedAt).ToListAsync(cancellationToken);
 
-        return Result.Success(new GetResponse(logs));
+        return Result.Success(new GetResponse(measurements, availableDates));
     }
 }
